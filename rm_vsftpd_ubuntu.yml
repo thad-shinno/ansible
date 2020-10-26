@@ -1,0 +1,38 @@
+---
+        - name: remove vsftpd
+          hosts: linux
+          become: yes
+          become_user: root
+          tasks:
+                  - name: check if vsftpd.conf exists
+                    stat:
+                            path: /etc/vsftpd.conf
+                    register: conf_result
+
+                  - name: check if vsftpd.conf.bak exists
+                    stat:
+                            path: /etc/vsftpd.conf.bak
+                    register: bak_result
+
+                  - name: remove vsftpd.conf
+                    file:
+                            path: /etc/vsftpd.conf
+                            state: absent
+                    when: not conf_result.stat.exists
+
+                  - name: remove vsftpd.conf.bak
+                    file:
+                            path: /etc/vsftpd.conf.bak
+                            state: absent
+                    when: not bak_result.stat.exists
+
+                  - name: remove /srv/ftp
+                    file:
+                            path: /srv/ftp
+                            state: absent
+                
+                  - name: purge vsftpd
+                    apt:
+                            name: vsftpd
+                            purge: yes
+                            state: absent

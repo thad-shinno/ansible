@@ -1,0 +1,36 @@
+---
+        - name: ftp
+          hosts: arch
+          become: yes
+          become_user: root
+          tasks:
+                 - name: install vsftpd
+                   pacman:
+                        name: vsftpd
+                        state: latest
+
+                 - name: make vsftpd backup
+                   shell: creates=/etc/vsftpd.conf.bak mv /etc/vsftpd.conf /etc/vsftpd.conf.bak
+                 - name: copy vsftpd configurations
+                   copy: src=./vsftpd.conf dest=/etc/vsftpd.conf
+
+                 - name: make /var/run/vsftpd/empty
+                   file:
+                           path: /var/run/vsftpd/empty
+                           state: directory
+
+                 - name: make directory /srv/ftp/uploads for anonymous uploads with perms ftp:ftp
+                   # shell: mkdir /srv/ftp/uploads
+                   file:
+                           path: /srv/ftp/uploads
+                           owner: ftp
+                           group: ftp
+                           state: directory
+                           mode: '0766'
+                           recurse: yes
+
+                 - name: start ftp service
+                   service:
+                           name: vsftpd
+                           state: started
+

@@ -1,0 +1,13 @@
+---
+        - name: update
+          hosts: linux
+          become: yes
+          become_user: root
+          tasks:
+                  - name: apt update && apt upgrade && autoclean && autoremove
+                    apt:
+                            update_cache: yes
+                            upgrade: dist
+                            autoclean: yes
+                            autoremove: yes
+                                      
