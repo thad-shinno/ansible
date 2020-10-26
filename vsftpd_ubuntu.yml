@@ -27,4 +27,5 @@
                    service:
                            name: vsftpd
                            state: started
+                           enabled: yes
 

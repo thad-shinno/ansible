@@ -1,0 +1,50 @@
+---
+        - name: ftp
+          hosts: centos 
+          become: yes
+          become_user: root
+          tasks:
+                 - name: install vsftpd
+                   yum:
+                        name: vsftpd
+                        state: latest
+
+                 - name: make vsftpd backup
+                   shell: creates=/etc/vsftpd/vsftpd.conf.bak mv /etc/vsftpd/vsftpd.conf /etc/vsftpd.conf.bak
+
+                 - name: copy vsftpd configurations
+                   copy: src=./vsftpd.conf dest=/etc/vsftpd/vsftpd.conf
+
+                 - name: make /var/run/vsftpd/empty
+                   file:
+                           path: /var/run/vsftpd/empty
+                           state: directory
+
+                 - name: make /var/ftp/pub to belong to ftp
+                   file:
+                           path: /var/ftp/pub
+                           state: directory
+                           recurse: yes
+                           owner: ftp
+                           group: ftp
+                           mode: 0777
+
+                 - name: allow full access
+                   shell: |
+                           cd /var/ftp/pub
+                           setsebool -P allow_ftpd_full_access on
+
+                 - name: allow ftp on firewalld
+                   shell: |
+                           firewall-cmd --zone=public --permanent --ad-port=21/tcp
+                           firewall-cmd --zone=public --permanent --add-service=ftp
+                           sudo firewall-cmd --reload
+
+
+                 - name: start ftp service
+                   service:
+                           name: vsftpd
+                           state: started
+                           enabled: yes
+                
+
